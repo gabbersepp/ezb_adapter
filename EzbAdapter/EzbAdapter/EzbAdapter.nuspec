@@ -10,10 +10,10 @@
     <projectUrl>https://github.com/gabbersepp/ezb_adapter</projectUrl>
     <!--<iconUrl></iconUrl>-->
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
-    <description>EzbAdapter provides you an easy to use interface to retrive the euro/x exchange rates from the official ezb api.</description>
+    <description>EzbAdapter provides you an easy to use interface to retrive the euro/x exchange rates from the official european central bank api.</description>
     <releaseNotes></releaseNotes>
     <copyright>2018 Josef Biehler</copyright>
-    <tags>ezb euro usd exchange rate money european central bank</tags>
+    <tags>ezb ecb euro usd exchange rate money european central bank</tags>
     <dependencies>
       <dependency id="RestSharp" version="106.3.1" />
     </dependencies>
