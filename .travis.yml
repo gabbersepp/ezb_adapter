@@ -2,7 +2,7 @@ language: csharp
 solution: EzbAdapter/EzbAdapter.sln
 install:
   - nuget restore EzbAdapter/EzbAdapter.sln
-  - nuget install NUnit.Runners -Version 3.8.0 -OutputDirectory testrunner
+  - nuget install NUnit.Console -Version 3.8.0 -OutputDirectory testrunner
 script:
   - xbuild /p:Configuration=Release EzbAdapter/EzbAdapter.sln
-  - mono ./testrunner/NUnit.Runners.3.8.0/tools/nunit-console.exe ./EzbAdapter/EzbAdapter.Test/bin/Release/EzbAdapter.Test.dll
+  - mono ./testrunner/NUnit.Console.3.8.0/tools/nunit-console.exe ./EzbAdapter/EzbAdapter.Test/bin/Release/EzbAdapter.Test.dll
