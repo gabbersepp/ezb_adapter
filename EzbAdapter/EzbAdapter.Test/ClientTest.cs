@@ -10,6 +10,21 @@ namespace EzbAdapter.Test
     public class ClientTest
     {
         [Test]
+        public void UseNextPossibleRate()
+        {
+            var bundle = new ExchangeRateBundle { Currency = Currency.USD };
+            var rates = new List<ExchangeRate>();
+            rates.Add(new ExchangeRate { Date = new DateTime(2018, 01, 01), Rate = 1.5f });
+            rates.Add(new ExchangeRate { Date = new DateTime(2018, 01, 03), Rate = 2f });
+            rates.Add(new ExchangeRate { Date = new DateTime(2018, 01, 04), Rate = 3f });
+            bundle.Rates = rates;
+
+            var converter = new CurrencyConverterImpl(new List<ExchangeRateBundle> { bundle });
+            var fx = converter.GetEuroFxFrom(Currency.USD, new DateTime(2018, 01, 02));
+            fx.Should().Be(2f);
+        }
+
+        [Test]
         public void TestParsing()
         {
             var partialSubstitute = Substitute.ForPartsOf<Client>();
