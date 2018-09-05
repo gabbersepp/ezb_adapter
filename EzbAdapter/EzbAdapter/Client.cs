@@ -69,7 +69,7 @@ namespace EzbAdapter
                             return new ExchangeRate
                             {
                                 Date = DateTime.Parse(x.Element("ObsDimension").Attribute("value").Value),
-                                Rate = float.Parse(x.Element("ObsValue").Attribute("value").Value.Replace(".", ","))
+                                Rate = float.Parse(x.Element("ObsValue").Attribute("value").Value, CultureInfo.InvariantCulture)
                             };
                         }).ToList();
 
