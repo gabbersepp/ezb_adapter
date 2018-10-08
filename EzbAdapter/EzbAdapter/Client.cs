@@ -10,7 +10,7 @@ using RestSharp;
 
 namespace EzbAdapter
 {
-    public class Client : IClient
+    public partial class Client : IClient
     {
         private static ILog log = LogManager.GetLogger<Client>();
 
@@ -73,7 +73,7 @@ namespace EzbAdapter
                             return new ExchangeRate
                             {
                                 Date = DateTime.Parse(x.Element("ObsDimension").Attribute("value").Value),
-                                Rate = float.Parse(x.Element("ObsValue").Attribute("value").Value.Replace(".", ","))
+                                Rate = float.Parse(x.Element("ObsValue").Attribute("value").Value, CultureInfo.InvariantCulture)
                             };
                         }).ToList();
 
@@ -83,43 +83,6 @@ namespace EzbAdapter
                 }).ToList();
 
             return new CurrencyConverterImpl(list);
-        }
-
-        internal class CurrencyConverterImpl : ICurrencyConverter
-        {
-            public CurrencyConverterImpl(List<ExchangeRateBundle> bundles)
-            {
-                this.bundles = bundles;
-            }
-
-            private List<ExchangeRateBundle> bundles { get; }
-
-            public double GetEuroFrom(Currency currency, double foreignValue, DateTime day)
-            {
-                var rate = GetEuroFxFrom(currency, day);
-
-                return foreignValue / rate;
-            }
-
-            public double GetEuroFxFrom(Currency currency, DateTime day)
-            {
-                var rates = bundles.First(x => x.Currency == currency).Rates;
-                ExchangeRate lastRate = null;
-
-                var firstPossibleDate = rates.Select(x =>
-                {
-                    if (x.Date.Year == day.Year && x.Date.Month == day.Month && x.Date.Day == day.Day)
-                    {
-                        return new { T = true, Rate = x };
-                    }
-
-                    lastRate = x;
-
-                    return new { T = false, Rate = (ExchangeRate)null };
-                }).FirstOrDefault(x => x.T);
-
-                return (firstPossibleDate?.Rate ?? lastRate).Rate;
-            }
         }
     }
 }
