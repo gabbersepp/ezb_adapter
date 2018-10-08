@@ -29,7 +29,8 @@ namespace EzbAdapter.Test
         {
             var partialSubstitute = Substitute.ForPartsOf<Client>();
             partialSubstitute.When(x => x.GetContent(Arg.Any<DateTime>(), Arg.Any<DateTime>(), Arg.Any<List<Currency>>())).DoNotCallBase();
-            partialSubstitute.GetContent(default(DateTime), default(DateTime), null).ReturnsForAnyArgs(@"<?xml version=""1.0"" encoding=""UTF-8""?><message:GenericData xmlns:message=""http://www.sdmx.org/resources/sdmxml/schemas/v2_1/message"" xmlns:common=""http://www.sdmx.org/resources/sdmxml/schemas/v2_1/common"" xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:generic=""http://www.sdmx.org/resources/sdmxml/schemas/v2_1/data/generic"" xsi:schemaLocation=""http://www.sdmx.org/resources/sdmxml/schemas/v2_1/message https://sdw-wsrest.ecb.europa.eu:443/vocabulary/sdmx/2_1/SDMXMessage.xsd http://www.sdmx.org/resources/sdmxml/schemas/v2_1/common https://sdw-wsrest.ecb.europa.eu:443/vocabulary/sdmx/2_1/SDMXCommon.xsd http://www.sdmx.org/resources/sdmxml/schemas/v2_1/data/generic https://sdw-wsrest.ecb.europa.eu:443/vocabulary/sdmx/2_1/SDMXDataGeneric.xsd"">
+
+            var content = @"<?xml version=""1.0"" encoding=""UTF-8""?><message:GenericData xmlns:message=""http://www.sdmx.org/resources/sdmxml/schemas/v2_1/message"" xmlns:common=""http://www.sdmx.org/resources/sdmxml/schemas/v2_1/common"" xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:generic=""http://www.sdmx.org/resources/sdmxml/schemas/v2_1/data/generic"" xsi:schemaLocation=""http://www.sdmx.org/resources/sdmxml/schemas/v2_1/message https://sdw-wsrest.ecb.europa.eu:443/vocabulary/sdmx/2_1/SDMXMessage.xsd http://www.sdmx.org/resources/sdmxml/schemas/v2_1/common https://sdw-wsrest.ecb.europa.eu:443/vocabulary/sdmx/2_1/SDMXCommon.xsd http://www.sdmx.org/resources/sdmxml/schemas/v2_1/data/generic https://sdw-wsrest.ecb.europa.eu:443/vocabulary/sdmx/2_1/SDMXDataGeneric.xsd"">
 <message:Header>
 <message:ID>615a7764-34d9-4e27-9901-b983fd2da9c0</message:ID>
 <message:Test>false</message:Test>
@@ -82,9 +83,11 @@ namespace EzbAdapter.Test
 </generic:Series>
 </message:DataSet>
 </message:GenericData>
-            ");
+            ";
 
-            var result = partialSubstitute.BuildForDate(default(DateTime), default(DateTime), new List<Currency>());
+            partialSubstitute.GetContent(default(DateTime), default(DateTime), null).ReturnsForAnyArgs(new Client.RestResult { Content = content, State = ConverterState.Success });
+
+            var result = partialSubstitute.BuildForDate(default(DateTime), default(DateTime), new List<Currency> { Currency.GBP, Currency.JPY });
 
             result.GetEuroFrom(Currency.USD, 30, new DateTime(2017, 1, 2)).Should().BeLessThan(28.667f);
             result.GetEuroFrom(Currency.USD, 30, new DateTime(2017, 1, 2)).Should().BeGreaterThan(28.666f);
