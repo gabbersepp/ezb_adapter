@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
+using Common.Logging;
 using EzbAdapter.Contracts;
 using RestSharp;
 
@@ -11,6 +12,8 @@ namespace EzbAdapter
 {
     public class Client : IClient
     {
+        private static ILog log = LogManager.GetLogger<Client>();
+
         // format of date: YYY-MM-DD
         private static string url = "service/data/EXR/D.{fx}.EUR.SP00.A/ECB?startPeriod={start}&endPeriod={end}&detail=dataonly";
 
@@ -40,6 +43,7 @@ namespace EzbAdapter
 
         public ICurrencyConverter BuildForDate(DateTime start, DateTime end, List<Currency> currencies)
         {
+            log.Debug("Start ecb adapter");
             var response = GetContent(start, end, currencies);
 
             return Build(response);
