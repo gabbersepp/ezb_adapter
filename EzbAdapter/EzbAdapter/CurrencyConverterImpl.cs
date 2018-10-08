@@ -12,7 +12,7 @@ namespace EzbAdapter
             this.bundles = bundles;
         }
 
-        private List<ExchangeRateBundle> bundles { get; }
+        internal List<ExchangeRateBundle> bundles { get; }
 
         public double GetEuroFrom(Currency currency, double foreignValue, DateTime day)
         {
@@ -43,5 +43,7 @@ namespace EzbAdapter
 
             return firstPossibleDate.Rate.Rate;
         }
+
+        public ConverterState State => ConverterState.Success;
     }
 }

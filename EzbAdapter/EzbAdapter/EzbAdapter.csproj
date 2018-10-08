@@ -51,10 +51,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Client.cs" />
+    <Compile Include="Contracts\ConverterState.cs" />
     <Compile Include="Contracts\Currency.cs" />
     <Compile Include="Contracts\ExchangeRate.cs" />
     <Compile Include="Contracts\ExchangeRateBundle.cs" />
     <Compile Include="CurrencyConverterImpl.cs" />
+    <Compile Include="FailureImpl.cs" />
     <Compile Include="IClient.cs" />
     <Compile Include="ICurrencyConverter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
