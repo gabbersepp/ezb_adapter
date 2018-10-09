@@ -4,7 +4,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Security.Policy;
 using System.Xml.Linq;
 using Common.Logging;
 using EzbAdapter.Contracts;
@@ -14,12 +13,24 @@ namespace EzbAdapter
 {
     public class Client : IClient
     {
+        private readonly int maxGap;
+        private readonly List<Currency> currencies;
+        private readonly DateTime start;
+        private readonly DateTime end;
         private static ILog log = LogManager.GetLogger<Client>();
 
         // format of date: YYY-MM-DD
         private static string url = "service/data/EXR/D.{fx}.EUR.SP00.A/ECB?startPeriod={start}&endPeriod={end}&detail=dataonly";
 
-        public virtual RestResult GetContent(DateTime start, DateTime end, List<Currency> currency)
+        public Client(int maxGap, List<Currency> currencies, DateTime start, DateTime end)
+        {
+            this.maxGap = maxGap;
+            this.currencies = currencies;
+            this.start = start;
+            this.end = end;
+        }
+
+        public virtual RestResult GetContent()
         {
             var startString = start.ToString("yyyy-MM-dd", CultureInfo.CurrentCulture);
             var endString = end.ToString("yyyy-MM-dd", CultureInfo.CurrentCulture);
@@ -29,7 +40,7 @@ namespace EzbAdapter
             var request = new RestRequest(url);
             request.AddUrlSegment("start", startString);
             request.AddUrlSegment("end", endString);
-            request.AddUrlSegment("fx", currency.Skip(1).Aggregate(currency[0].ToString(), (x, y) => $"{x}+{y}"));
+            request.AddUrlSegment("fx", currencies.Skip(1).Aggregate(currencies[0].ToString(), (x, y) => $"{x}+{y}"));
 
             request.Method = Method.GET;
 
@@ -65,26 +76,11 @@ namespace EzbAdapter
             }
         }
 
-        public ICurrencyConverter BuildFromEzbFile(string ezbFile)
+        private ICurrencyConverter BuildFromText(string content, DateTime start, DateTime end, List<Currency> currencies)
         {
-            log.Debug($"Start ecb adapter from file: {ezbFile}");
-            string ezbContent = File.ReadAllText(ezbFile);
-            return Build(ezbContent);
-        }
-
-        public ICurrencyConverter BuildForDate(DateTime start, DateTime end, List<Currency> currencies)
-        {
-            log.Debug($"Start ecb adapter for: start: {start}, end: {end}, currencies: {currencies.Select(x => x.ToString()).Aggregate("", (x,y) => x + "," + y)}");
-            var response = GetContent(start, end, currencies);
-
-            if (response.State != ConverterState.Success)
-            {
-                return new FailureImpl(response.State);
-            }
-
             try
             {
-                var result = (CurrencyConverterImpl)Build(response.Content);
+                var result = (CurrencyConverterImpl)Build(content);
 
                 if (result.bundles.Count != currencies.Count)
                 {
@@ -104,6 +100,26 @@ namespace EzbAdapter
                 log.Error("error during parsing of ecb result: " + e);
                 return new FailureImpl(ConverterState.ParseFailure);
             }
+        }
+
+        public ICurrencyConverter BuildFromEzbFile(string ezbFile)
+        {
+            log.Debug($"Start ecb adapter from file: {ezbFile}");
+            string ezbContent = File.ReadAllText(ezbFile);
+            return BuildFromText(ezbContent, start, end, currencies);
+        }
+
+        public ICurrencyConverter BuildForDate()
+        {
+            log.Debug($"Start ecb adapter for: start: {start}, end: {end}, currencies: {currencies.Select(x => x.ToString()).Aggregate("", (x,y) => x + "," + y)}");
+            var response = GetContent();
+
+            if (response.State != ConverterState.Success)
+            {
+                return new FailureImpl(response.State);
+            }
+
+            return BuildFromText(response.Content, start, end, currencies);
         }
 
         private ICurrencyConverter Build(string content)
@@ -139,7 +155,7 @@ namespace EzbAdapter
                     return bundle;
                 }).ToList();
 
-            return new CurrencyConverterImpl(list);
+            return new CurrencyConverterImpl(list, maxGap);
         }
 
         public class RestResult

@@ -53,6 +53,7 @@
     <Compile Include="Client.cs" />
     <Compile Include="Contracts\ConverterState.cs" />
     <Compile Include="Contracts\Currency.cs" />
+    <Compile Include="Contracts\DateOutsideRangeException.cs" />
     <Compile Include="Contracts\ExchangeRate.cs" />
     <Compile Include="Contracts\ExchangeRateBundle.cs" />
     <Compile Include="CurrencyConverterImpl.cs" />

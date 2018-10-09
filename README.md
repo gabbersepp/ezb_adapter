@@ -9,9 +9,9 @@ There are two possible use cases where you can use this library. First you can f
     {
         static void Main(string[] args)
         {
-            var client = new Client();
-            var result = client.BuildForDate(new DateTime(2018, 10, 1), new DateTime(2018, 10, 9), new List<Currency> { Currency.USD, Currency.JPY });
-            
+            var client = new Client(10, new List<Currency> { Currency.USD, Currency.JPY }, new DateTime(2018, 10, 1), new DateTime(2018, 10, 9));
+            var result = client.BuildForDate();
+
             if (result.State == ConverterState.Success)
             {
                 Console.WriteLine($"100$ on 5. of October are {result.GetEuroFrom(Currency.USD, 100, new DateTime(2018, 10, 5))}€ at a exchange rate of {result.GetEuroFxFrom(Currency.USD, new DateTime(2018, 10, 5))}");

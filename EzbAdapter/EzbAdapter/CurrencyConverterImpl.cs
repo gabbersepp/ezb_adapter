@@ -7,8 +7,11 @@ namespace EzbAdapter
 {
     public sealed class CurrencyConverterImpl : ICurrencyConverter
     {
-        public CurrencyConverterImpl(List<ExchangeRateBundle> bundles)
+        private readonly int maxGap;
+
+        public CurrencyConverterImpl(List<ExchangeRateBundle> bundles, int maxGap)
         {
+            this.maxGap = maxGap;
             this.bundles = bundles;
         }
 
@@ -29,17 +32,22 @@ namespace EzbAdapter
             {
                 if (x.Date.Year == day.Year && x.Date.Month == day.Month && x.Date.Day == day.Day)
                 {
-                    return new { T = true, Rate = x };
+                    return new { Rate = x, Gap = 0.0 };
                 }
 
                 if (x.Date > day)
                 {
                     // first rate after wanted date
-                    return new { T = true, Rate = x };
+                    return new { Rate = x, Gap = Math.Abs((x.Date-day).TotalDays) };
                 }
 
-                return new { T = false, Rate = (ExchangeRate)null };
-            }).FirstOrDefault(x => x.T);
+                return new { Rate = (ExchangeRate)null, Gap = 0.0 };
+            }).Where(x => x.Gap <= maxGap).OrderBy(x => x.Gap).FirstOrDefault(x => x.Rate != null);
+
+            if (firstPossibleDate == null)
+            {
+                throw new DateOutsideRangeException(day);
+            }
 
             return firstPossibleDate.Rate.Rate;
         }

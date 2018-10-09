@@ -9,6 +9,24 @@ namespace EzbAdapter.Test
 {
     public class ClientTest
     {
+        /*
+         * The maximal gap between two dates must be configured. A day outside of this allowed gap is an error
+         */
+        [Test]
+        public void HandleRequestedDateOutsideRange()
+        {
+            var bundle = new ExchangeRateBundle { Currency = Currency.USD };
+            var rates = new List<ExchangeRate>();
+            rates.Add(new ExchangeRate { Date = new DateTime(2018, 01, 01), Rate = 1.5f });
+            bundle.Rates = rates;
+
+            var converter = new CurrencyConverterImpl(new List<ExchangeRateBundle> { bundle }, 10);
+
+            // use date outside of range
+            Assert.Throws<DateOutsideRangeException>(() => converter.GetEuroFxFrom(Currency.USD, new DateTime(2018, 01, 10)));
+            Assert.Throws<DateOutsideRangeException>(() => converter.GetEuroFxFrom(Currency.USD, new DateTime(2017, 12, 10)));
+        }
+
         [Test]
         public void UseNextPossibleRate()
         {
@@ -19,7 +37,7 @@ namespace EzbAdapter.Test
             rates.Add(new ExchangeRate { Date = new DateTime(2018, 01, 04), Rate = 3f });
             bundle.Rates = rates;
 
-            var converter = new CurrencyConverterImpl(new List<ExchangeRateBundle> { bundle });
+            var converter = new CurrencyConverterImpl(new List<ExchangeRateBundle> { bundle }, 1);
             var fx = converter.GetEuroFxFrom(Currency.USD, new DateTime(2018, 01, 02));
             fx.Should().Be(2f);
         }
@@ -27,8 +45,8 @@ namespace EzbAdapter.Test
         [Test]
         public void TestParsing()
         {
-            var partialSubstitute = Substitute.ForPartsOf<Client>();
-            partialSubstitute.When(x => x.GetContent(Arg.Any<DateTime>(), Arg.Any<DateTime>(), Arg.Any<List<Currency>>())).DoNotCallBase();
+            var partialSubstitute = Substitute.ForPartsOf<Client>(0, new List<Currency> { Currency.GBP, Currency.JPY }, default(DateTime), default(DateTime));
+            partialSubstitute.When(x => x.GetContent()).DoNotCallBase();
 
             var content = @"<?xml version=""1.0"" encoding=""UTF-8""?><message:GenericData xmlns:message=""http://www.sdmx.org/resources/sdmxml/schemas/v2_1/message"" xmlns:common=""http://www.sdmx.org/resources/sdmxml/schemas/v2_1/common"" xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:generic=""http://www.sdmx.org/resources/sdmxml/schemas/v2_1/data/generic"" xsi:schemaLocation=""http://www.sdmx.org/resources/sdmxml/schemas/v2_1/message https://sdw-wsrest.ecb.europa.eu:443/vocabulary/sdmx/2_1/SDMXMessage.xsd http://www.sdmx.org/resources/sdmxml/schemas/v2_1/common https://sdw-wsrest.ecb.europa.eu:443/vocabulary/sdmx/2_1/SDMXCommon.xsd http://www.sdmx.org/resources/sdmxml/schemas/v2_1/data/generic https://sdw-wsrest.ecb.europa.eu:443/vocabulary/sdmx/2_1/SDMXDataGeneric.xsd"">
 <message:Header>
@@ -85,9 +103,9 @@ namespace EzbAdapter.Test
 </message:GenericData>
             ";
 
-            partialSubstitute.GetContent(default(DateTime), default(DateTime), null).ReturnsForAnyArgs(new Client.RestResult { Content = content, State = ConverterState.Success });
+            partialSubstitute.GetContent().ReturnsForAnyArgs(new Client.RestResult { Content = content, State = ConverterState.Success });
 
-            var result = partialSubstitute.BuildForDate(default(DateTime), default(DateTime), new List<Currency> { Currency.GBP, Currency.JPY });
+            var result = partialSubstitute.BuildForDate();
 
             result.GetEuroFrom(Currency.USD, 30, new DateTime(2017, 1, 2)).Should().BeLessThan(28.667f);
             result.GetEuroFrom(Currency.USD, 30, new DateTime(2017, 1, 2)).Should().BeGreaterThan(28.666f);
