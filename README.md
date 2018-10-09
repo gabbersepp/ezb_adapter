@@ -34,6 +34,11 @@ Secondly you can pass a path to a text file that contains the content of the ecb
 ...
 ```
 
+## Expanding the date range
+The ECB does not deliver a rate for every day. For example for Sundays no rates are delivered.
+If you build the client to fetch rates from e.g. Sunday to next Monday which can be a holiday and you then try to get the rate of the first Sunday, then you will not get any rate. 
+To avoid this, the date range is expanded 10 days at both sides.
+
 ## Notes
 Please check the result state before using it. The ecb server is not always available.
 
