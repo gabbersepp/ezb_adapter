@@ -32,8 +32,8 @@ namespace EzbAdapter
 
         public virtual RestResult GetContent()
         {
-            var startString = start.ToString("yyyy-MM-dd", CultureInfo.CurrentCulture);
-            var endString = end.ToString("yyyy-MM-dd", CultureInfo.CurrentCulture);
+            var startString = start.AddDays(-10).ToString("yyyy-MM-dd", CultureInfo.CurrentCulture);
+            var endString = end.AddDays(10).ToString("yyyy-MM-dd", CultureInfo.CurrentCulture);
 
             var client = new RestClient("https://sdw-wsrest.ecb.europa.eu");
 
