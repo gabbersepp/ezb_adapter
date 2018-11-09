@@ -15,7 +15,7 @@
     <copyright>2018 Josef Biehler</copyright>
     <tags>ezb ecb euro usd exchange rate money european central bank</tags>
     <dependencies>
-      <dependency id="RestSharp" version="106.3.1" />
+      <dependency id="RestSharp" version="106.5.4" />
     </dependencies>
     <summary></summary>
   </metadata>
