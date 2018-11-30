@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Web.Configuration;
 using System.Xml.Linq;
 using Common.Logging;
 using EzbAdapter.Contracts;
@@ -124,38 +125,40 @@ namespace EzbAdapter
 
         private ICurrencyConverter Build(string content)
         {
-            content = content.Replace("message:", "").Replace("generic:", "");
+            var obj = Deserializer.Deserialize(GenerateStreamFromString(content), out var errors);
 
-            var xdoc = XDocument.Parse(content);
-
-            var list = xdoc.Descendants("GenericData")
-                .First().Descendants("Series").Select(series =>
+            var list = obj.DataSet.Series.Select(series =>
                 {
-                    var currency = series
-                            .Descendants("SeriesKey").First()
-                            .Descendants("Value")
-                            .First(x => x.Attribute("id").Value == "CURRENCY").Attribute("value").Value;
+                    var currency = series.SeriesKey.Value.First(x => x.Id == "CURRENCY").Value;
+                    var curParsed = (Currency) Enum.Parse(typeof(Currency), currency);
 
-                    var curParsed = (Currency)Enum.Parse(typeof(Currency), currency);
-
-                    var bundle = new ExchangeRateBundle { Currency = curParsed };
-
-                    var rates = series.Descendants("Obs")
-                        .Select(x =>
+                    return series.Obs.Select(obs => new
                         {
-                            return new ExchangeRate
-                            {
-                                Date = DateTime.Parse(x.Element("ObsDimension").Attribute("value").Value),
-                                Rate = float.Parse(x.Element("ObsValue").Attribute("value").Value, CultureInfo.InvariantCulture)
-                            };
-                        }).ToList();
-
-                    bundle.Rates = rates;
-
-                    return bundle;
+                            Currency = curParsed,
+                            Date = DateTime.Parse(obs.ObsDimension.Value),
+                            Rate = obs.ObsValue.Value
+                        }
+                    );
+                })
+                .SelectMany(x => x)
+                .GroupBy(x => x.Currency)
+                .Select(x => new ExchangeRateBundle
+                {
+                    Currency = x.Key,
+                    Rates = x.Select(rate => new ExchangeRate {Date = rate.Date, Rate = rate.Rate}).ToList()
                 }).ToList();
 
             return new CurrencyConverterImpl(list, maxGap);
+        }
+
+        public static Stream GenerateStreamFromString(string s)
+        {
+            var stream = new MemoryStream();
+            var writer = new StreamWriter(stream);
+            writer.Write(s);
+            writer.Flush();
+            stream.Position = 0;
+            return stream;
         }
 
         public class RestResult
