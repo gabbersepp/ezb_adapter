@@ -2,7 +2,7 @@
 <package  xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
   <metadata>    
     <id>Biehler.EzbAdapter</id>
-    <version>1.1.3</version>
+    <version>1.2.0</version>
     <title>EZB exchange rate adapter</title>
     <authors>gabbersepp</authors>
     <owners>gabbersepp</owners>
@@ -11,7 +11,7 @@
     <!--<iconUrl></iconUrl>-->
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <description>EzbAdapter provides you an easy to use interface to retrive the euro/x exchange rates from the official european central bank api.</description>
-    <releaseNotes>Dependency update</releaseNotes>
+    <releaseNotes>Parse ecb xml correctly and not by hand</releaseNotes>
     <copyright>2018 Josef Biehler</copyright>
     <tags>ezb ecb euro usd exchange rate money european central bank</tags>
     <dependencies>
