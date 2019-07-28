@@ -6,6 +6,8 @@
 		JPY, CHF,
 		CAD, AUD,
 		NZD, ZAR,
-		HKD
+		HKD, SEK, 
+		MXN, RUB,
+		NOK
 	}
 }
