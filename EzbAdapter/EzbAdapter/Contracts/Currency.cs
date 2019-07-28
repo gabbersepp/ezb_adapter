@@ -2,7 +2,10 @@
 {
     public enum Currency
     {
-        USD, GBP,
-        JPY
-    }
+		USD, GBP,
+		JPY, CHF,
+		CAD, AUD,
+		NZD, ZAR,
+		HKD
+	}
 }
