@@ -21,7 +21,7 @@ namespace EzbAdapter
         private static ILog log = LogManager.GetLogger<Client>();
 
         // format of date: YYY-MM-DD
-        private static string url = "service/data/EXR/D.{fx}.EUR.SP00.A/ECB?startPeriod={start}&endPeriod={end}&detail=dataonly";
+        private static string url = "service/data/EXR/D.{fx}.EUR.SP00.A/ECB?detail=dataonly";
 
         public Client(int maxGap, List<Currency> currencies, DateTime start, DateTime end)
         {
@@ -39,8 +39,8 @@ namespace EzbAdapter
             var client = new RestClient("https://sdw-wsrest.ecb.europa.eu");
 
             var request = new RestRequest(url);
-            request.AddUrlSegment("start", startString);
-            request.AddUrlSegment("end", endString);
+            request.AddQueryParameter("startPeriod", startString);
+            request.AddQueryParameter("endPeriod", endString);
             request.AddUrlSegment("fx", currencies.Skip(1).Aggregate(currencies[0].ToString(), (x, y) => $"{x}+{y}"));
 
             request.Method = Method.GET;
