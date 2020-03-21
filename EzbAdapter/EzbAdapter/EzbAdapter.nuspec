@@ -2,7 +2,7 @@
 <package  xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
   <metadata>    
     <id>Biehler.EzbAdapter</id>
-    <version>1.4.1</version>
+    <version>1.4.2</version>
     <title>EZB exchange rate adapter</title>
     <authors>gabbersepp</authors>
     <owners>gabbersepp</owners>
@@ -14,7 +14,7 @@
     <copyright>2018 Josef Biehler</copyright>
     <tags>ezb ecb euro usd exchange rate money european central bank</tags>
     <dependencies>
-      <dependency id="RestSharp" version="106.5.4" />
+      <dependency id="RestSharp" version="106.10.1" />
     </dependencies>
     <summary></summary>
   </metadata>
