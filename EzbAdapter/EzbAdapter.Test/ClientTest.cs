@@ -9,6 +9,12 @@ namespace EzbAdapter.Test
 {
     public class ClientTest
     {
+        [Test]
+        public void Test()
+        {
+            var client = new Client(10, new List<Currency> { Currency.USD }, DateTime.Now.AddDays(-10), DateTime.Now);
+            var converter = client.BuildForDate();
+        }
         /*
          * The maximal gap between two dates must be configured. A day outside of this allowed gap is an error
          */
